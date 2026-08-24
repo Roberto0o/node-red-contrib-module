@@ -1,0 +1,48 @@
+{
+  "name": "node-red-contrib-module",
+  "version": "0.1.0",
+  "description": "Define reusable, live JavaScript modules inside the Node-RED editor and use them from any Function node without wires.",
+  "keywords": [
+    "node-red",
+    "node-red-contrib",
+    "function",
+    "module",
+    "javascript",
+    "services",
+    "reusable"
+  ],
+  "homepage": "https://github.com/Roberto0o/node-red-contrib-module#readme",
+  "bugs": {
+    "url": "https://github.com/Roberto0o/node-red-contrib-module/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Roberto0o/node-red-contrib-module.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Robert W. (Robert0)",
+    "url": "https://github.com/Roberto0o"
+  },
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "test": "node --test test/module-name.test.js test/registry.test.js test/runtime.test.js test/package.test.js && node --check module.js && node --check runtime/module-name.js && node --check runtime/registry.js && node --check runtime/evaluator.js && node --check runtime/lifecycle.js && node --check runtime/nodes.js && node --check resources/module-editor.js"
+  },
+  "files": [
+    "module.js",
+    "module.html",
+    "runtime",
+    "resources",
+    "icons",
+    "README.md",
+    "LICENSE"
+  ],
+  "node-red": {
+    "version": ">=5.0.0",
+    "nodes": {
+      "module": "module.js"
+    }
+  }
+}

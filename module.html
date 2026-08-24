@@ -1,0 +1,94 @@
+<!--
+  Node-RED loads this file beside module.js. The editor implementation lives in
+  resources/ so the runtime and browser responsibilities remain separate.
+-->
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="resources/node-red-contrib-module/module-editor.css"
+/>
+<script
+  type="text/javascript"
+  src="resources/node-red-contrib-module/module-editor.js"
+></script>
+
+<script type="text/html" data-template-name="module">
+  <input type="hidden" id="node-input-func" />
+  <input type="hidden" id="node-input-noerr" />
+
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-moduleName"
+      ><i class="fa fa-cube"></i> Module Name</label
+    >
+    <input
+      type="text"
+      id="node-input-moduleName"
+      placeholder="devices"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="form-row module-tabs-row">
+    <ul id="module-tabs"></ul>
+  </div>
+
+  <div id="module-tabs-content">
+    <div id="module-tab-body" style="display: none">
+      <div class="form-row node-text-editor-row module-editor-row">
+        <div
+          class="node-text-editor"
+          id="node-input-module-editor"
+        ></div>
+        <button
+          type="button"
+          id="node-module-expand-js"
+          class="red-ui-button red-ui-button-small module-expand-button"
+        >
+          <i class="fa fa-expand"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="module">
+  <p>
+    Defines a reusable JavaScript module that starts when flows are deployed and
+    can be used by Function nodes without wires.
+  </p>
+
+  <h3>Details</h3>
+  <p>
+    <b>Module Name</b> is the unique global lookup key. It is independent from
+    the optional display <b>Name</b>.
+  </p>
+  <p>Export an API with CommonJS-style module code:</p>
+  <pre>function hello() {
+    return "hello";
+}
+
+module.exports = { hello };</pre>
+  <p>Use it from a normal Function node:</p>
+  <pre>const test = global.get("useModule")("test");
+msg.payload = test.hello();
+return msg;</pre>
+
+  <h3>Module dependencies</h3>
+  <p>
+    Use <code>moduleRef("logging")</code> for a lazy, live reference to another
+    module. The reference resolves the current exports whenever a property is
+    used, including after that dependency is redeployed.
+  </p>
+
+  <h3>Cleanup</h3>
+  <p>
+    Register one or more synchronous or asynchronous cleanup functions with
+    <code>node.onClose(callback)</code>. Timers created with the provided timer
+    functions are also cleared automatically.
+  </p>
+</script>

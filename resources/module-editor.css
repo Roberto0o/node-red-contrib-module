@@ -1,0 +1,29 @@
+.module-tabs-row {
+  margin-bottom: 0;
+}
+
+#module-tabs {
+  min-width: 400px;
+  margin-bottom: 20px;
+}
+
+#module-tabs-content {
+  min-height: calc(100% - 140px);
+}
+
+.module-editor-row {
+  position: relative;
+  margin-bottom: 0;
+}
+
+#node-input-module-editor {
+  height: 320px;
+  min-height: 150px;
+}
+
+.module-expand-button {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% - 20px);
+  z-index: 10;
+}
