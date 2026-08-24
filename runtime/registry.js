@@ -20,8 +20,10 @@ class DuplicateModuleError extends Error {
 class ModuleRegistry {
   constructor() {
     this.records = new Map();
+    this.references = new Map();
     this.useModule = this.useModule.bind(this);
     this.moduleRef = this.moduleRef.bind(this);
+    this.modules = this.createModulesProxy();
   }
 
   registerLoading(moduleName, nodeId, ownerToken) {
@@ -126,10 +128,17 @@ class ModuleRegistry {
     const validName = validateModuleName(moduleName);
     const registry = this;
 
-    return new Proxy(
+    if (this.references.has(validName)) {
+      return this.references.get(validName);
+    }
+
+    const reference = new Proxy(
       {},
       {
         get: function (_target, property) {
+          if (property === Symbol.toStringTag) {
+            return 'ModuleReference';
+          }
           const moduleExports = registry.useModule(validName);
           const value = Reflect.get(Object(moduleExports), property, moduleExports);
           return typeof value === 'function'
@@ -157,6 +166,48 @@ class ModuleRegistry {
           }
 
           return Object.assign({}, descriptor, { configurable: true });
+        },
+      },
+    );
+    this.references.set(validName, reference);
+    return reference;
+  }
+
+  createModulesProxy() {
+    const registry = this;
+
+    return new Proxy(
+      {},
+      {
+        get: function (_target, property) {
+          if (property === Symbol.toStringTag) {
+            return 'NodeRedModules';
+          }
+          if (typeof property !== 'string') {
+            return undefined;
+          }
+          return registry.moduleRef(property);
+        },
+        has: function (_target, property) {
+          return typeof property === 'string' && registry.records.has(property);
+        },
+        ownKeys: function () {
+          return Array.from(registry.records.keys());
+        },
+        getOwnPropertyDescriptor: function (_target, property) {
+          if (typeof property !== 'string' || !registry.records.has(property)) {
+            return undefined;
+          }
+          return {
+            configurable: true,
+            enumerable: true,
+          };
+        },
+        set: function () {
+          return false;
+        },
+        deleteProperty: function () {
+          return false;
         },
       },
     );

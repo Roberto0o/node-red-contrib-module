@@ -24,14 +24,27 @@ test('editor registers a zero-port Function-category node and compiles', functio
     'utf8',
   );
   const html = fs.readFileSync(path.join(root, 'module.html'), 'utf8');
+  const icon = fs.readFileSync(path.join(root, 'icons', 'module.svg'), 'utf8');
 
   assert.match(editorSource, /category:\s*'function'/);
-  assert.match(editorSource, /color:\s*'#fdd0a2'/);
+  assert.match(editorSource, /color:\s*'#ACE3D9'/);
   assert.match(editorSource, /inputs:\s*0/);
   assert.match(editorSource, /outputs:\s*0/);
+  assert.match(editorSource, /outputs:\s*\{/);
   assert.match(editorSource, /RED\.editor\.createEditor/);
   assert.match(editorSource, /RED\.editor\.editJavaScript/);
+  assert.match(editorSource, /javascriptDefaults\.addExtraLib/);
+  assert.match(editorSource, /declare const modules: NodeRedModuleRegistry/);
+  assert.match(editorSource, /declare function emit/);
+  assert.match(editorSource, /\/\* global emit, modules \*\//);
+  assert.match(editorSource, /RED\.view\.reveal/);
   assert.match(html, /data-template-name="module"/);
+  assert.match(html, /id="module-tab-references"/);
+  assert.match(html, /id="node-input-outputs"/);
+  assert.match(html, /placeholder="Module Name"/);
+  assert.match(html, /reference-scanner\.js/);
+  assert.match(html, /module-intellisense\.js/);
+  assert.match(icon, /stroke="#fff"/);
   assert.doesNotThrow(function () {
     new Function(editorSource);
   });

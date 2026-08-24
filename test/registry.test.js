@@ -71,3 +71,23 @@ test('moduleRef resolves current exports and preserves method receivers', functi
   });
   assert.equal(logging.version(), 'v2');
 });
+
+test('modules proxy exposes stable live properties without exposing the registry', function () {
+  const registry = new ModuleRegistry();
+  const firstOwner = Symbol('first');
+  const secondOwner = Symbol('second');
+  const modules = registry.modules;
+  const devices = modules.devices;
+
+  registry.registerLoading('devices', 'device-node', firstOwner);
+  registry.markReady('devices', firstOwner, { version: function () { return 1; } });
+  assert.equal(devices.version(), 1);
+  assert.equal(modules.devices, devices);
+  assert.deepEqual(Object.keys(modules), ['devices']);
+
+  registry.registerLoading('devices', 'device-node', secondOwner);
+  registry.markReady('devices', secondOwner, { version: function () { return 2; } });
+  assert.equal(devices.version(), 2);
+  assert.equal('devices' in modules, true);
+  assert.equal(Reflect.set(modules, 'other', {}), false);
+});

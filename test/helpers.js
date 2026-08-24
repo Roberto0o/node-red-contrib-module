@@ -20,6 +20,8 @@ function createContextStore() {
 function createRed() {
   let NodeConstructor;
   const globalContext = createContextStore();
+  const runtimeNodes = [];
+  const events = new EventEmitter();
 
   const RED = {
     nodes: {
@@ -30,6 +32,8 @@ function createRed() {
         nodeContext.global = globalContext;
 
         node.id = config.id;
+        node.type = config.type || 'module';
+        node.z = config.z || 'flow-1';
         node.name = config.name || '';
         node.on = emitter.on.bind(emitter);
         node.emit = emitter.emit.bind(emitter);
@@ -40,6 +44,7 @@ function createRed() {
         node.errors = [];
         node.warnings = [];
         node.logs = [];
+        node.sent = [];
         node.status = function (status) {
           node.statuses.push(status);
         };
@@ -54,13 +59,21 @@ function createRed() {
         };
         node.debug = node.log;
         node.trace = node.log;
+        node.send = function (messages) {
+          node.sent.push(messages);
+        };
+        runtimeNodes.push(node);
       },
       registerType: function (type, constructor) {
         if (type === 'module') {
           NodeConstructor = constructor;
         }
       },
+      eachNode: function (callback) {
+        runtimeNodes.forEach(callback);
+      },
     },
+    events,
     util: {
       getSetting: function (_node, name) {
         return process.env[name];
@@ -71,6 +84,10 @@ function createRed() {
   return {
     RED,
     globalContext,
+    addRuntimeNode: function (node) {
+      runtimeNodes.push(node);
+      return node;
+    },
     getConstructor: function () {
       return NodeConstructor;
     },

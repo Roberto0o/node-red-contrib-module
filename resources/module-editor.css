@@ -8,7 +8,11 @@
 }
 
 #module-tabs-content {
-  min-height: calc(100% - 140px);
+  min-height: calc(100% - 180px);
+}
+
+.module-outputs-input {
+  width: 70px !important;
 }
 
 .module-editor-row {
@@ -26,4 +30,70 @@
   right: 0;
   bottom: calc(100% - 20px);
   z-index: 10;
+}
+
+.module-references-summary {
+  align-items: baseline;
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+#module-reference-count {
+  font-weight: 600;
+}
+
+.module-reference-table-wrap {
+  border: 1px solid var(--red-ui-form-input-border-color);
+  border-radius: 3px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.module-reference-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.module-reference-table th,
+.module-reference-table td {
+  border-bottom: 1px solid var(--red-ui-secondary-border-color);
+  overflow: hidden;
+  padding: 8px 10px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.module-reference-table th {
+  background: var(--red-ui-tertiary-background);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.module-reference-table th:first-child {
+  width: 90px;
+}
+
+.module-reference-row {
+  cursor: pointer;
+}
+
+.module-reference-row:hover,
+.module-reference-row:focus {
+  background: var(--red-ui-list-item-background-hover);
+  outline: none;
+}
+
+.module-reference-type i {
+  margin-right: 6px;
+  width: 14px;
+}
+
+.module-reference-empty {
+  color: var(--red-ui-secondary-text-color);
+  padding: 24px 12px;
+  text-align: center;
 }

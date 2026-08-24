@@ -9,6 +9,14 @@
 />
 <script
   type="text/javascript"
+  src="resources/node-red-contrib-module/module-intellisense.js"
+></script>
+<script
+  type="text/javascript"
+  src="resources/node-red-contrib-module/reference-scanner.js"
+></script>
+<script
+  type="text/javascript"
   src="resources/node-red-contrib-module/module-editor.js"
 ></script>
 
@@ -28,9 +36,16 @@
     <input
       type="text"
       id="node-input-moduleName"
-      placeholder="devices"
+      placeholder="Module Name"
       autocomplete="off"
     />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-outputs"
+      ><i class="fa fa-random"></i> Outputs</label
+    >
+    <input type="text" id="node-input-outputs" class="module-outputs-input" />
   </div>
 
   <div class="form-row module-tabs-row">
@@ -38,6 +53,28 @@
   </div>
 
   <div id="module-tabs-content">
+    <div id="module-tab-references" style="display: none">
+      <div class="module-references-summary">
+        <span id="module-reference-count">0 references</span>
+        <span>in the current flow configuration</span>
+      </div>
+      <div class="module-reference-table-wrap">
+        <table class="module-reference-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Flow</th>
+              <th>Node</th>
+            </tr>
+          </thead>
+          <tbody id="module-reference-list"></tbody>
+        </table>
+        <div id="module-reference-empty" class="module-reference-empty">
+          No Function or Module nodes currently refer to this module.
+        </div>
+      </div>
+    </div>
+
     <div id="module-tab-body" style="display: none">
       <div class="form-row node-text-editor-row module-editor-row">
         <div
@@ -58,8 +95,9 @@
 
 <script type="text/html" data-help-name="module">
   <p>
-    Defines a reusable JavaScript module that starts when flows are deployed and
-    can be used by Function nodes without wires.
+    Defines a reusable JavaScript module that starts when flows are deployed,
+    returns values directly to callers, and can optionally emit messages through
+    configured outputs.
   </p>
 
   <h3>Details</h3>
@@ -74,15 +112,21 @@
 
 module.exports = { hello };</pre>
   <p>Use it from a normal Function node:</p>
-  <pre>const test = global.get("useModule")("test");
+  <pre>const test = global.get("modules").test;
 msg.payload = test.hello();
 return msg;</pre>
 
   <h3>Module dependencies</h3>
   <p>
-    Use <code>moduleRef("logging")</code> for a lazy, live reference to another
-    module. The reference resolves the current exports whenever a property is
-    used, including after that dependency is redeployed.
+    Module code receives the same live <code>modules</code> object. Use
+    <code>const logging = modules.logging;</code> to refer to another module.
+  </p>
+
+  <h3>Outputs</h3>
+  <p>
+    Set <b>Outputs</b> to zero for a pure library, or configure one or more wired
+    outputs. <code>emit(1, msg)</code> sends a message through output 1. Returned
+    JavaScript values go only to the caller and never emit automatically.
   </p>
 
   <h3>Cleanup</h3>
