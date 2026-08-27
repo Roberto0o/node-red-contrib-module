@@ -4,6 +4,8 @@ const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 
 async function evaluateModule(options) {
   const moduleObject = { exports: {} };
+  const externalModules = options.externalModules || {};
+  const externalNames = Object.keys(externalModules);
   const sourceUrl =
     'node-red-module-' + encodeURIComponent(options.moduleName) + '.js';
   const source =
@@ -18,10 +20,12 @@ async function evaluateModule(options) {
     'env',
     'modules',
     'emit',
+    'require',
     'setTimeout',
     'clearTimeout',
     'setInterval',
     'clearInterval',
+    ...externalNames,
     source,
   );
 
@@ -35,10 +39,14 @@ async function evaluateModule(options) {
     options.env,
     options.modules,
     options.emit,
+    options.require,
     options.timers.setTimeout,
     options.timers.clearTimeout,
     options.timers.setInterval,
     options.timers.clearInterval,
+    ...externalNames.map(function (name) {
+      return externalModules[name];
+    }),
   );
 
   return moduleObject.exports;

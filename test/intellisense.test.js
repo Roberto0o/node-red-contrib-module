@@ -116,6 +116,7 @@ test('mirrors Module sources and types the shared registry through imports', fun
   const declarations = harness.libraries.at(-1).source;
   assert.match(declarations, /declare var module: \{ exports: any \};/);
   assert.match(declarations, /declare var exports: any;/);
+  assert.match(declarations, /declare function require\(moduleName: string\): any;/);
   assert.match(
     declarations,
     /readonly test: typeof import\("\.\/module-test\.js"\)/,

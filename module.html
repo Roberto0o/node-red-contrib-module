@@ -41,6 +41,14 @@
     />
   </div>
 
+  <div class="form-row" id="module-rename-references-row">
+    <label for="node-input-updateReferences"
+      ><i class="fa fa-retweet"></i> References</label
+    >
+    <input type="checkbox" id="node-input-updateReferences" />
+    <span id="module-rename-references-label"></span>
+  </div>
+
   <div class="form-row">
     <label for="node-input-outputs"
       ><i class="fa fa-random"></i> Outputs</label
@@ -53,6 +61,16 @@
   </div>
 
   <div id="module-tabs-content">
+    <div id="module-tab-setup" style="display: none">
+      <div class="form-row module-libs-heading">
+        <label><i class="fa fa-cubes"></i> Modules</label>
+        <span>Import external Node.js modules into this Module.</span>
+      </div>
+      <div class="form-row" id="node-input-libs-container-row">
+        <ol id="node-input-libs-container"></ol>
+      </div>
+    </div>
+
     <div id="module-tab-references" style="display: none">
       <div class="module-references-summary">
         <span id="module-reference-count">0 references</span>
@@ -120,6 +138,13 @@ return msg;</pre>
   <p>
     Module code receives the same live <code>modules</code> object. Use
     <code>const logging = modules.logging;</code> to refer to another module.
+  </p>
+
+  <h3>External modules</h3>
+  <p>
+    Add Node.js modules on the <b>Setup</b> tab. Use the configured import
+    variable directly, or call <code>require("module-name")</code>. Only modules
+    configured on the Setup tab can be required.
   </p>
 
   <h3>Outputs</h3>

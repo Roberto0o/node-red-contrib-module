@@ -2,6 +2,11 @@
 
 const referenceScanner = require('../resources/reference-scanner');
 const { evaluateModule } = require('./evaluator');
+const {
+  createConfiguredRequire,
+  loadExternalModules,
+  normalizeExternalModules,
+} = require('./external-modules');
 const { createLifecycle } = require('./lifecycle');
 const { validateModuleName } = require('./module-name');
 const { ModuleRegistry } = require('./registry');
@@ -180,6 +185,7 @@ function registerNodes(RED) {
     };
     let moduleName = config.moduleName;
     let outputCount = 0;
+    let externalModules = [];
     let registered = false;
     let initialization = Promise.resolve();
 
@@ -234,9 +240,11 @@ function registerNodes(RED) {
     try {
       moduleName = validateModuleName(moduleName);
       outputCount = normalizeOutputCount(config.outputs);
+      externalModules = normalizeExternalModules(config.libs);
       instance.moduleName = moduleName;
       node.moduleName = moduleName;
       node.outputs = outputCount;
+      node.libs = externalModules;
       registry.registerLoading(moduleName, node.id, ownerToken);
       registered = true;
       nodeContext.global.set('modules', registry.modules);
@@ -255,18 +263,24 @@ function registerNodes(RED) {
         return instance.closed;
       },
     );
-    initialization = evaluateModule({
-      moduleName,
-      source,
-      node: nodeApi,
-      context,
-      flow,
-      global,
-      env,
-      modules: registry.modules,
-      emit,
-      timers: lifecycle.timers,
-    })
+    initialization = loadExternalModules(RED, externalModules)
+      .then(function (loadedModules) {
+        const require = createConfiguredRequire(externalModules, loadedModules);
+        return evaluateModule({
+          moduleName,
+          source,
+          node: nodeApi,
+          context,
+          flow,
+          global,
+          env,
+          modules: registry.modules,
+          emit,
+          require,
+          timers: lifecycle.timers,
+          externalModules: loadedModules,
+        });
+      })
       .then(function (moduleExports) {
         if (instance.closed) {
           return;
@@ -294,7 +308,9 @@ function registerNodes(RED) {
       });
   }
 
-  RED.nodes.registerType('module', ModuleNode);
+  RED.nodes.registerType('module', ModuleNode, {
+    dynamicModuleList: 'libs',
+  });
 }
 
 module.exports = registerNodes;

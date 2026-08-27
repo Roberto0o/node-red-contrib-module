@@ -82,3 +82,50 @@ test('returns each active referring node once', function () {
     ['function-a', 'module-a'],
   );
 });
+
+test('rewrites only structural module references and preserves local names', function () {
+  const source = [
+    'const direct = global.get("modules").devices;',
+    'const bracket = global.get("modules")["devices"];',
+    'const available = global.get("modules"); available.devices.get();',
+    'modules.devices.get();',
+    'const { devices, devices: deviceApi } = modules;',
+    'const text = "modules.devices and devices";',
+    '// modules.devices must stay in this comment',
+    'const template = `modules.devices`;',
+    'const pattern = /modules\\.devices/;',
+  ].join('\n');
+
+  const updated = scanner.rewriteReferences(source, 'devices', 'hardware', {
+    allowDirectModules: true,
+  });
+
+  assert.equal(updated.count, 6);
+  assert.match(updated.source, /global\.get\("modules"\)\.hardware/);
+  assert.match(updated.source, /global\.get\("modules"\)\["hardware"\]/);
+  assert.match(updated.source, /available\.hardware\.get\(\)/);
+  assert.match(updated.source, /modules\.hardware\.get\(\)/);
+  assert.match(
+    updated.source,
+    /\{ hardware: devices, hardware: deviceApi \} = modules/,
+  );
+  assert.match(updated.source, /"modules\.devices and devices"/);
+  assert.match(updated.source, /\/\/ modules\.devices must stay/);
+  assert.match(updated.source, /`modules\.devices`/);
+  assert.match(updated.source, /\/modules\\\.devices\//);
+});
+
+test('uses bracket notation when a renamed module is not an identifier', function () {
+  const updated = scanner.rewriteReferences(
+    'const { devices } = modules; modules?.devices.get();',
+    'devices',
+    'device-store',
+    { allowDirectModules: true },
+  );
+
+  assert.equal(updated.count, 2);
+  assert.equal(
+    updated.source,
+    'const { "device-store": devices } = modules; modules?.["device-store"].get();',
+  );
+});

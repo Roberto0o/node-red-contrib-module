@@ -12,6 +12,7 @@ test('package exposes the Module node and ships its runtime and editor assets', 
     fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
   );
   assert.equal(packageJson.name, 'node-red-contrib-module');
+  assert.equal(packageJson.version, '1.0.1');
   assert.equal(packageJson['node-red'].nodes.module, 'module.js');
   assert.ok(packageJson.files.includes('runtime'));
   assert.ok(packageJson.files.includes('resources'));
@@ -21,6 +22,10 @@ test('package exposes the Module node and ships its runtime and editor assets', 
 test('editor registers a zero-port Function-category node and compiles', function () {
   const editorSource = fs.readFileSync(
     path.join(root, 'resources', 'module-editor.js'),
+    'utf8',
+  );
+  const runtimeSource = fs.readFileSync(
+    path.join(root, 'runtime', 'nodes.js'),
     'utf8',
   );
   const html = fs.readFileSync(path.join(root, 'module.html'), 'utf8');
@@ -36,10 +41,19 @@ test('editor registers a zero-port Function-category node and compiles', functio
   assert.match(editorSource, /javascriptDefaults\.addExtraLib/);
   assert.match(editorSource, /declare const modules: NodeRedModuleRegistry/);
   assert.match(editorSource, /declare function emit/);
-  assert.match(editorSource, /\/\* global emit, modules \*\//);
+  assert.match(editorSource, /declare function require/);
+  assert.match(editorSource, /\/\* global emit, modules, require \*\//);
+  assert.match(editorSource, /scrollOnAdd:\s*false/);
   assert.match(editorSource, /RED\.view\.reveal/);
+  assert.match(runtimeSource, /dynamicModuleList:\s*'libs'/);
+  assert.match(editorSource, /refreshModuleLibs/);
+  assert.match(editorSource, /rewriteReferences/);
+  assert.match(editorSource, /isActiveNode\(candidate\)/);
   assert.match(html, /data-template-name="module"/);
+  assert.match(html, /id="module-tab-setup"/);
   assert.match(html, /id="module-tab-references"/);
+  assert.match(html, /id="node-input-libs-container"/);
+  assert.match(html, /id="node-input-updateReferences"/);
   assert.match(html, /id="node-input-outputs"/);
   assert.match(html, /placeholder="Module Name"/);
   assert.match(html, /reference-scanner\.js/);

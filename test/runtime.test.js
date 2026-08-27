@@ -14,6 +14,8 @@ function setup() {
     addRuntimeNode: harness.addRuntimeNode,
     events: harness.RED.events,
     globalContext: harness.globalContext,
+    getRegistrationOptions: harness.getRegistrationOptions,
+    setImportedModule: harness.setImportedModule,
   };
 }
 
@@ -220,6 +222,73 @@ test('zero-output modules reject emit without affecting ordinary returns', async
   assert.throws(function () {
     api.send();
   }, /only 0 outputs are configured/);
+});
+
+test('loads Function-style external module imports and exposes them by variable name', async function () {
+  const {
+    NodeConstructor,
+    getRegistrationOptions,
+    globalContext,
+    setImportedModule,
+  } = setup();
+  setImportedModule('os', {
+    platform: function () {
+      return 'test-platform';
+    },
+  });
+
+  const node = new NodeConstructor({
+    id: 'import-node',
+    moduleName: 'systemInfo',
+    outputs: 0,
+    libs: [{ module: 'os', var: 'operatingSystem' }],
+    func:
+      'module.exports = { ' +
+      'platform: () => operatingSystem.platform(), ' +
+      'requiredPlatform: () => require("os").platform(), ' +
+      'missing: () => require("not-configured") ' +
+      '};',
+  });
+  await waitUntilReady(node, 'systemInfo');
+
+  assert.equal(globalContext.get('modules').systemInfo.platform(), 'test-platform');
+  assert.equal(
+    globalContext.get('modules').systemInfo.requiredPlatform(),
+    'test-platform',
+  );
+  assert.throws(function () {
+    globalContext.get('modules').systemInfo.missing();
+  }, /Add it to the Module node's Setup imports first/);
+  assert.deepEqual(getRegistrationOptions(), { dynamicModuleList: 'libs' });
+});
+
+test('reports invalid or unavailable external imports as module errors', async function () {
+  const { NodeConstructor, setImportedModule } = setup();
+  setImportedModule('broken-package', new Error('package failed to load'));
+
+  const reserved = new NodeConstructor({
+    id: 'reserved-import',
+    moduleName: 'reservedImport',
+    outputs: 0,
+    libs: [{ module: 'os', var: 'modules' }],
+    func: 'module.exports = {};',
+  });
+  assert.equal(reserved.statuses.at(-1).fill, 'red');
+  assert.match(reserved.errors[0], /is reserved/);
+
+  const unavailable = new NodeConstructor({
+    id: 'unavailable-import',
+    moduleName: 'unavailableImport',
+    outputs: 0,
+    libs: [{ module: 'broken-package', var: 'brokenPackage' }],
+    func: 'module.exports = {};',
+  });
+  await waitFor(function () {
+    return unavailable.statuses.some(function (status) {
+      return status.fill === 'red';
+    });
+  });
+  assert.match(unavailable.errors[0], /package failed to load/);
 });
 
 test('status reports reference counts and distinguishes used and unused modules', async function () {

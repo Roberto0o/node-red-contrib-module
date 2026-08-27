@@ -19,9 +19,11 @@ function createContextStore() {
 
 function createRed() {
   let NodeConstructor;
+  let registrationOptions;
   const globalContext = createContextStore();
   const runtimeNodes = [];
   const events = new EventEmitter();
+  const importedModules = new Map();
 
   const RED = {
     nodes: {
@@ -64,9 +66,10 @@ function createRed() {
         };
         runtimeNodes.push(node);
       },
-      registerType: function (type, constructor) {
+      registerType: function (type, constructor, options) {
         if (type === 'module') {
           NodeConstructor = constructor;
+          registrationOptions = options;
         }
       },
       eachNode: function (callback) {
@@ -74,6 +77,19 @@ function createRed() {
       },
     },
     events,
+    settings: {
+      functionExternalModules: true,
+    },
+    import: async function (moduleName) {
+      if (!importedModules.has(moduleName)) {
+        throw new Error("Module '" + moduleName + "' is not available");
+      }
+      const imported = importedModules.get(moduleName);
+      if (imported instanceof Error) {
+        throw imported;
+      }
+      return imported;
+    },
     util: {
       getSetting: function (_node, name) {
         return process.env[name];
@@ -90,6 +106,12 @@ function createRed() {
     },
     getConstructor: function () {
       return NodeConstructor;
+    },
+    getRegistrationOptions: function () {
+      return registrationOptions;
+    },
+    setImportedModule: function (moduleName, value) {
+      importedModules.set(moduleName, value);
     },
   };
 }

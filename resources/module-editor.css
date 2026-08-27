@@ -3,7 +3,7 @@
 }
 
 #module-tabs {
-  min-width: 400px;
+  min-width: 620px;
   margin-bottom: 20px;
 }
 
@@ -21,8 +21,8 @@
 }
 
 #node-input-module-editor {
-  height: 320px;
-  min-height: 150px;
+  height: 460px;
+  min-height: 280px;
 }
 
 .module-expand-button {
@@ -96,4 +96,76 @@
   color: var(--red-ui-secondary-text-color);
   padding: 24px 12px;
   text-align: center;
+}
+
+#module-rename-references-row {
+  display: none;
+}
+
+#node-input-updateReferences {
+  margin-left: 0;
+  vertical-align: middle;
+  width: auto;
+}
+
+#module-rename-references-label {
+  margin-left: 6px;
+}
+
+.module-libs-heading {
+  align-items: baseline;
+  display: flex;
+}
+
+#node-input-libs-container-row .red-ui-editableList-container {
+  padding: 0;
+}
+
+#node-input-libs-container {
+  height: 420px;
+  min-height: 300px;
+}
+
+#node-input-libs-container-row .red-ui-editableList-header {
+  background: var(--red-ui-tertiary-background);
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  display: flex;
+  padding-right: 75px;
+}
+
+#node-input-libs-container-row .red-ui-editableList-header > div {
+  flex-grow: 1;
+}
+
+.module-lib-entry {
+  display: flex;
+}
+
+.module-lib-entry > span {
+  flex-grow: 1;
+  position: relative;
+  width: 50%;
+}
+
+.module-lib-entry .red-ui-typedInput-container,
+.module-lib-entry input {
+  width: 100%;
+}
+
+.module-lib-entry .red-ui-typedInput-container {
+  border: none;
+  border-radius: 0;
+}
+
+.module-lib-entry .red-ui-typedInput-type-select {
+  border-radius: 0 !important;
+  height: 34px;
+}
+
+.module-lib-entry > span > input[type='text'] {
+  border-bottom-color: var(--red-ui-form-background);
+  border-radius: 0;
+  border-right-color: var(--red-ui-form-background);
+  border-top-color: var(--red-ui-form-background);
 }

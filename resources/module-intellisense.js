@@ -147,6 +147,7 @@
       '// Available before Node-RED finishes loading its server-side globals.',
       'declare var module: { exports: any };',
       'declare var exports: any;',
+      'declare function require(moduleName: string): any;',
       '',
     ];
 
